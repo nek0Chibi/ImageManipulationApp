@@ -1,0 +1,67 @@
+[versions]
+agp = "8.6.0"
+kotlin = "1.9.24"
+coreKtx = "1.13.1"
+junit = "4.13.2"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+lifecycleRuntimeKtx = "2.8.5"
+activityCompose = "1.9.2"
+composeBom = "2024.09.01"
+navigationCompose = "2.8.0"
+hilt = "2.51"
+hiltExt = "1.2.0"
+ksp = "1.9.24-1.0.20"
+mlkit = "19.0.1"
+composeCoil = "2.5.0"
+vision = "20.1.3"
+camerax_version = "1.3.4"
+icons_extended = "1.7.1"
+accompanist_version = "0.12.0"
+image-cropper = "4.6.0"
+runnerVersion = "1.6.1"
+aireVersion = "0.13.13"
+
+
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+hilt-ext-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltExt" }
+hilt-ext-navigation = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltExt" }
+mlkit-text-recognition = {group = "com.google.android.gms", name = "play-services-mlkit-text-recognition", version.ref = "mlkit"}
+coil-compose = {group = "io.coil-kt", name = "coil-compose", version.ref = "composeCoil"}
+vision-service = {group = "com.google.android.gms", name = "play-services-vision", version.ref = "vision"}
+camerax-core = {group = "androidx.camera", name = "camera-core", version.ref = "camerax_version"}
+camerax-camera2 = {group = "androidx.camera", name = "camera-camera2", version.ref = "camerax_version"}
+camerax-lifecycle = {group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax_version"}
+camerax-video = {group = "androidx.camera", name = "camera-video", version.ref = "camerax_version"}
+camerax-view = {group = "androidx.camera", name = "camera-view", version.ref = "camerax_version"}
+camerax-extensions = {group = "androidx.camera", name = "camera-extensions", version.ref = "camerax_version"}
+icons-extended = {group = "androidx.compose.material", name = "material-icons-extended", version.ref = "icons_extended"}
+accompanist-permissions = {group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist_version"}
+image-cropper = {group = "com.vanniktech", name = "android-image-cropper", version.ref = "image-cropper"}
+androidx-runner = { group = "androidx.test", name = "runner", version.ref = "runnerVersion" }
+aire = {group = "com.github.awxkee", name = "aire", version.ref = "aireVersion"}
+
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
