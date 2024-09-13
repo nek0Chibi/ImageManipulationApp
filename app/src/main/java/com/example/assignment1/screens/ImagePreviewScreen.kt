@@ -41,7 +41,6 @@ fun ImagePreviewScreen(
     onNavigate: (NavigationUiEvent) -> Unit,
     onClickEvent: (ImagePreviewEvent) -> Unit
 ) {
-
     Scaffold(
         topBar = {
             TopAppBar(

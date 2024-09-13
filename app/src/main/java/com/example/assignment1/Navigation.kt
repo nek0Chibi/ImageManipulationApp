@@ -1,15 +1,25 @@
 package com.example.assignment1
 
 import ImagePreviewScreen
-import android.net.Uri
+import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
@@ -34,19 +44,24 @@ fun Navigation(viewModel: MainViewModel = hiltViewModel()) {
 
     val navController = rememberNavController()
     val context = LocalContext.current
+    var infoDialogVisible by remember { mutableStateOf(false) }
 
     NavHost(
         navController = navController,
         startDestination = Routes.WELCOMESCREEN
     ) {
-        composable(Routes.WELCOMESCREEN) {
-            WelcomeScreen(navController)
+        composable(
+            route = Routes.WELCOMESCREEN,
+            enterTransition = { fadeIn() + slideInVertically() },
+            exitTransition = { fadeOut() + slideOutVertically() }
+        ) {
+            WelcomeScreen { navController.navigate(Routes.MAINSCREEN) }
         }
         composable(Routes.MAINSCREEN) {
             MainScreen(
-                onImagePicked = { pickedBitmap, uri ->
+                onImagePicked = { pickedBitmap, info ->
                     viewModel.updateBitmap(pickedBitmap)
-                    viewModel.updateImageUri(uri)
+                    viewModel.updateImage(info)
                 },
                 onNavigate = { event ->
                     onNavigationEvent(event, navController)
@@ -55,60 +70,69 @@ fun Navigation(viewModel: MainViewModel = hiltViewModel()) {
         }
         composable(Routes.IMAGEPREVIEWSCREEN) {
             val bitmap = viewModel.bitmap.collectAsState().value
-            val imageUri = viewModel.imageUri.collectAsState().value
+            val imageUri = viewModel.imageInfo.collectAsState().value
             ImagePreviewScreen(
                 bitmap = bitmap,
                 onNavigate = { event ->
                     onNavigationEvent(event, navController)
                 },
                 onClickEvent = { event ->
-                    onImagePreviewEvent(event, navController, imageUri, context)
+                    onImagePreviewEvent(
+                        event = event,
+                        navController = navController,
+                        imageUri = imageUri?.uri,
+                        context = context,
+                        onSaveImage = { viewModel.onEvent(UiEvent.OnSaveImage) },
+                        showInfoDialog = { infoDialogVisible = true }
+                    )
                 }
             )
+
+            if (infoDialogVisible) {
+                ImageInfoDialog(imageInfo = imageUri!!) {
+                    infoDialogVisible = false
+                }
+            }
+
         }
         composable(Routes.IMAGEEDITSCREEN) {
 
-            val bitmap = viewModel.bitmap.collectAsState().value
-            val imageUri = viewModel.imageUri.collectAsState().value
+            val bitmap = viewModel.editableImage.collectAsState().value
+            val imageUri = viewModel.imageInfo.collectAsState().value
 
             val cropImageLauncher = rememberLauncherForActivityResult(
                 contract = CropImageContract()
             ) { result ->
                 if (result.isSuccessful) {
-                    val croppedImageUri = result.uriContent
-
-                    val croppedBitmap = uriToBitmap(croppedImageUri!!, context)
-                    viewModel.updateBitmap(croppedBitmap!!)
-
+                    viewModel.onNewEdit(uriToBitmap(result.uriContent!!, context)!!.copy(Bitmap.Config.ARGB_8888, true))
                 } else {
                     println("Crop Image Error: ${result.error}")
                 }
             }
 
             ImageEditScreen(
-                bitmap = bitmap,
+                bitmap = bitmap!!,
                 onNavigate = { event ->
                     onNavigationEvent(event, navController)
                 },
                 onClickEvent = { event ->
-                    onImageEditEvent(event, context, bitmap, imageUri, cropImageLauncher) {
-                        viewModel.updateBitmap(it)
+                    onImageEditEvent(
+                        event = event,
+                        onEvent = viewModel::onEvent,
+                        imageUri = imageUri?.uri,
+                    ) {
+                        cropImageLauncher.launch(it)
                     }
                 },
-                onCancelEvent = { bitmapOrg ->
-                    viewModel.updateBitmap(bitmapOrg)
-                }
             )
-
         }
     }
 }
 
 
-
 @Composable
 fun ImageInfoDialog(
-    imageUri: Uri?,
+    imageInfo: ImageInfo,
     onDismiss: () -> Unit
 ) {
     Dialog(
@@ -118,26 +142,27 @@ fun ImageInfoDialog(
             dismissOnClickOutside = true
         )
     ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+        Surface(
+            modifier = Modifier.size(200.dp)
         ) {
-            val imageInfo = imageUri?.let { getImageInfoFromUri(LocalContext.current, it) }
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+//            val imageInfo = imageUri?.let { getImageInfoFromUri(LocalContext.current, it) }
 
-            Text(text = "Name: ${imageInfo?.name ?: "Unknown"}")
-            Text(text = "Width: ${imageInfo?.width ?: "Unknown"}")
-            Text(text = "Height: ${imageInfo?.height ?: "Unknown"}")
-            Text(text = "Format: ${imageInfo?.format ?: "Unknown"}")
-            Text(text = "File Size: ${imageInfo?.fileSize ?: "Unknown"}")
+                Text(text = "Name: ${imageInfo.name ?: "Unknown"}")
+                Text(text = "Width: ${imageInfo.width ?: "Unknown"}")
+                Text(text = "Height: ${imageInfo.height ?: "Unknown"}")
+                Text(text = "Format: ${imageInfo.format ?: "Unknown"}")
+                Text(text = "File Size: ${imageInfo.fileSize ?: "Unknown"}")
+            }
         }
     }
 }
-
-
-
 
 
 object Routes {

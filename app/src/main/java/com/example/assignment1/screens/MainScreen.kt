@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import android.provider.MediaStore
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -36,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.example.assignment1.ImageInfo
 import com.example.assignment1.events.NavigationUiEvent
 import com.example.assignment1.events.uriToBitmap
 
@@ -43,23 +45,37 @@ import com.example.assignment1.events.uriToBitmap
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    onImagePicked: (Bitmap, Uri) -> Unit,
+    onImagePicked: (Bitmap, ImageInfo) -> Unit,
     onNavigate: (NavigationUiEvent) -> Unit
 ) {
-
     val context = LocalContext.current
 
     val pickImageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        uri?.let {
-            val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            context.contentResolver.takePersistableUriPermission(uri, flag)
 
-            val bitmap = uriToBitmap(it, context)
-            bitmap?.let { newBitmap ->
-                onImagePicked(newBitmap, it)
+        uri?.let { resolvedUri ->
+            val mime = context.contentResolver.getType(resolvedUri) ?: "Unknown"
+            context.contentResolver.query(resolvedUri, null, null, null, null)?.use { cursor ->
+                val iName = cursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME)
+                val iSize = cursor.getColumnIndex(MediaStore.Images.Media.SIZE)
+                val width = cursor.getColumnIndex(MediaStore.Images.Media.WIDTH)
+                val height = cursor.getColumnIndex(MediaStore.Images.Media.HEIGHT)
+
+                if (iName != -1 && iSize != -1 && width != -1 && height != -1 && cursor.moveToFirst()) {
+                    val name = cursor.getString(iName)
+                    val size = cursor.getLong(iSize)
+                    val w = cursor.getInt(width)
+                    val h = cursor.getInt(height)
+                    val imageInfo = ImageInfo(
+                        name = name, fileSize = size,
+                        width = w, height = h,
+                        format = mime, uri = resolvedUri
+                    )
+                    uriToBitmap(resolvedUri, context)?.let { bitmap ->
+                        onImagePicked(bitmap.copy(Bitmap.Config.ARGB_8888, true), imageInfo)
+                        onNavigate(NavigationUiEvent.NavigateToImagePreviewScreen)
+                    }
+                }
             }
-
-            onNavigate(NavigationUiEvent.NavigateToImagePreviewScreen)
         }
     }
 

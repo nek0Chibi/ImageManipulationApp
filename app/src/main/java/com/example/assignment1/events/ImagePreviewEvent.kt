@@ -17,12 +17,12 @@ fun onImagePreviewEvent(
     event: ImagePreviewEvent,
     navController: NavController,
     imageUri: Uri?,
-    context: Context
+    context: Context,
+    onSaveImage: () -> Unit,
+    showInfoDialog: () -> Unit
 ) {
     when (event) {
-        ImagePreviewEvent.OnInfoClicked -> {
-
-        }
+        ImagePreviewEvent.OnInfoClicked -> showInfoDialog()
 
         ImagePreviewEvent.OnEditClicked -> {
             navController.navigate(Routes.IMAGEEDITSCREEN)
@@ -32,7 +32,7 @@ fun onImagePreviewEvent(
             shareImage(imageUri, context)
         }
 
-        ImagePreviewEvent.OnSaveClicked -> TODO()
+        ImagePreviewEvent.OnSaveClicked -> onSaveImage()
     }
 }
 

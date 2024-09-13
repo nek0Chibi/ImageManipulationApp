@@ -7,11 +7,10 @@ import android.graphics.Matrix
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import androidx.activity.compose.ManagedActivityResultLauncher
-import com.awxkee.aire.Aire
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
 import com.canhub.cropper.CropImageView
+import com.example.assignment1.UiEvent
 
 sealed class ImageEditEvent {
     data object OnGrayscaleClicked : ImageEditEvent()
@@ -24,23 +23,15 @@ sealed class ImageEditEvent {
 
 fun onImageEditEvent(
     event: ImageEditEvent,
-    context: Context,
-    bitmap: Bitmap,
+    onEvent: (UiEvent) -> Unit,
     imageUri: Uri?,
-    cropImageLauncher: ManagedActivityResultLauncher<CropImageContractOptions, CropImageView.CropResult>,
-    onBitmapChanged: (Bitmap) -> Unit
+    onLaunchCropIntent: (CropImageContractOptions) -> Unit,
 ) {
-
-    when (event) {
-        ImageEditEvent.OnGrayscaleClicked -> {
-            val softwareBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-            val grayscaleBitmap = Aire.grayscale(softwareBitmap)
-            onBitmapChanged(grayscaleBitmap)
-        }
-
-
+    when(event) {
+        ImageEditEvent.OnGrayscaleClicked -> onEvent(UiEvent.OnGrayscaleClicked)
+        ImageEditEvent.OnRotateClicked -> onEvent(UiEvent.OnRotateBitmap)
+        is ImageEditEvent.OnSaveClicked -> onEvent(UiEvent.UpdateBitmap)
         ImageEditEvent.OnCropClicked -> {
-
             imageUri?.let {
                 val cropOptions = CropImageContractOptions(
                     uri = it,
@@ -49,24 +40,13 @@ fun onImageEditEvent(
                         guidelines = CropImageView.Guidelines.ON
                     )
                 )
-                cropImageLauncher.launch(cropOptions)
+                onLaunchCropIntent(cropOptions)
             }
 
         }
-
-        ImageEditEvent.OnRotateClicked -> {
-            val flippedBitmap = bitmap.rotate(90f)
-            onBitmapChanged(flippedBitmap)
-        }
-
-        ImageEditEvent.OnResizeClicked -> TODO()
-
-        is ImageEditEvent.OnSaveClicked -> {
-            onBitmapChanged(event.bitmap)
-        }
+        else -> { /* no-op */ }
     }
 }
-
 
 fun Bitmap.rotate(degrees: Float): Bitmap {
     val matrix = Matrix().apply { postRotate(degrees) }

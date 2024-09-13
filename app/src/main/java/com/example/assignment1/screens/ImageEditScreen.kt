@@ -26,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -44,12 +43,7 @@ fun ImageEditScreen(
     bitmap: Bitmap,
     onNavigate: (NavigationUiEvent) -> Unit,
     onClickEvent: (ImageEditEvent) -> Unit,
-    onCancelEvent: (Bitmap) -> Unit
 ) {
-
-    val bitmapOrg = mutableStateOf(bitmap)
-
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -59,7 +53,6 @@ fun ImageEditScreen(
                     IconButton(
                         onClick = {
                             onNavigate(NavigationUiEvent.NavigateBack)
-                            onCancelEvent(bitmapOrg.value)
                         }
                     ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -157,6 +150,5 @@ private fun ImageEditScreenPreview() {
         bitmap = createBitmap(100, 100),
         onNavigate = {},
         onClickEvent = {},
-        onCancelEvent = {}
     )
 }
